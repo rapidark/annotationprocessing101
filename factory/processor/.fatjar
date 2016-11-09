@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Wed Nov 09 14:15:38 CST 2016
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=annotationprocessing101-processor_fat.jar
+manifest.mergeall=true
+manifest.mainclass=
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=

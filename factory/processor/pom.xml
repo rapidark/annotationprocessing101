@@ -33,7 +33,7 @@
     <dependency>
       <groupId>com.google.auto.service</groupId>
       <artifactId>auto-service</artifactId>
-      <version>1.0-rc1</version>
+      <version>1.0-rc2</version>
       <optional>true</optional>
     </dependency>
 
@@ -53,6 +53,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+				<source>1.8</source>
+				<target>1.8</target>
+				<!-- Disable annotation processing for ourselves.
+				<compilerArgument>-proc:none</compilerArgument>
+				 -->
+			</configuration>
       </plugin>
 
       <plugin>

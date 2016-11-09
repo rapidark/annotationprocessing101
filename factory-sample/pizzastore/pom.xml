@@ -46,7 +46,12 @@
           <compilerArgument>-Xlint:all</compilerArgument>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
-        </configuration>
+				<source>1.8</source>
+				<target>1.8</target>
+				<!-- Disable annotation processing for ourselves.
+				<compilerArgument>-proc:none</compilerArgument>
+				 -->
+			</configuration>
       </plugin>
 
       <plugin>
