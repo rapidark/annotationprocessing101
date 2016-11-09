@@ -17,10 +17,13 @@
 package com.hannesdorfmann.annotationprocessing101.factory.processor;
 
 import com.google.auto.service.AutoService;
+import com.hannesdorfmann.annotationprocessing101.factory.annotation.Complexity;
 import com.hannesdorfmann.annotationprocessing101.factory.annotation.Factory;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
@@ -46,32 +49,15 @@ import javax.tools.Diagnostic;
  *
  * @author Hannes Dorfmann
  */
-@AutoService(Processor.class) public class FactoryProcessor extends AbstractProcessor {
+@AutoService(Processor.class)
+public class FactoryProcessor extends BaseProcessor {
 
-  private Types typeUtils;
-  private Elements elementUtils;
-  private Filer filer;
-  private Messager messager;
-  private Map<String, FactoryGroupedClasses> factoryClasses =
-      new LinkedHashMap<String, FactoryGroupedClasses>();
+	private Map<String, FactoryGroupedClasses> factoryClasses = new LinkedHashMap<>();
 
-  @Override public synchronized void init(ProcessingEnvironment processingEnv) {
-    super.init(processingEnv);
-    typeUtils = processingEnv.getTypeUtils();
-    elementUtils = processingEnv.getElementUtils();
-    filer = processingEnv.getFiler();
-    messager = processingEnv.getMessager();
-  }
-
-  @Override public Set<String> getSupportedAnnotationTypes() {
-    Set<String> annotataions = new LinkedHashSet<String>();
-    annotataions.add(Factory.class.getCanonicalName());
-    return annotataions;
-  }
-
-  @Override public SourceVersion getSupportedSourceVersion() {
-    return SourceVersion.latestSupported();
-  }
+	@Override
+	public List<Class<?>> acceptAnnotationTypes() {
+		return Arrays.asList(Factory.class);
+	}
 
   /**
    * Checks if the annotated element observes our rules
@@ -147,7 +133,7 @@ import javax.tools.Diagnostic;
   }
 
   @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+  public boolean doProcess(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
     try {
 
@@ -194,13 +180,4 @@ import javax.tools.Diagnostic;
     return true;
   }
 
-  /**
-   * Prints an error message
-   *
-   * @param e The element which has caused the error. Can be null
-   * @param msg The error message
-   */
-  public void error(Element e, String msg) {
-    messager.printMessage(Diagnostic.Kind.ERROR, msg, e);
-  }
 }

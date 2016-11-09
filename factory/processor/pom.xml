@@ -5,11 +5,15 @@
   <parent>
     <artifactId>parent</artifactId>
     <groupId>com.hannesdorfmann.annotationprocessing101.factorypattern</groupId>
-    <version>1.0</version>
+    <version>0.1.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>processor</artifactId>
+  
+  <properties>
+  	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <dependencies>
 
@@ -37,7 +41,11 @@
       <optional>true</optional>
     </dependency>
 
-
+ <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.6</version>
+        </dependency>
     <!-- Apache Commons StringUtils -->
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -56,6 +64,7 @@
         <configuration>
 				<source>1.8</source>
 				<target>1.8</target>
+				  <encoding>UTF8</encoding> 
 				<!-- Disable annotation processing for ourselves.
 				<compilerArgument>-proc:none</compilerArgument>
 				 -->
@@ -66,11 +75,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
-
+<!-- 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
+      </plugin> -->
+      
+      
     </plugins>
   </build>
 
