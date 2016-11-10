@@ -34,8 +34,7 @@ import com.hannesdorfmann.annotationprocessing101.factory.annotation.BeanInfo;
 /**
  * Created by Jianan on 2015/10/24.
  */
-@AutoService(Processor.class)
-public class BeanInfoProcessor extends BaseProcessor {
+public class VelocityBeanInfoProcessor extends BaseProcessor {
 	
     @Override
     public boolean doProcess(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv){
@@ -85,11 +84,52 @@ public class BeanInfoProcessor extends BaseProcessor {
 
             if (fqClassName != null) {
 
-//                vc.put("className", className);
-//                vc.put("packageName", packageName);
-//                vc.put("fields", fields);
-//                vc.put("methods", methods);
+                Properties props = new Properties();
+//                props.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+//                props.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getCanonicalName());
 
+                URL url = this.getClass().getClassLoader().getResource("velocity.properties");
+                URL beaninfoVm = this.getClass().getClassLoader().getResource("beaninfo.vm");
+                log("velocity.properties path: " + url.getPath());
+                log("beaninfo.vm path: " + beaninfoVm.getPath());
+                props.load(url.openStream());
+                
+//                String templateName = "";
+                final String templatePath = "beaninfo.vm";
+//                final String templatePath = "templates/" + templateName + ".vm";
+                InputStream input = this.getClass().getClassLoader().getResourceAsStream(templatePath);
+                if (input == null) {
+                    throw new IOException("Template file doesn't exist");
+                }
+
+                InputStreamReader reader = new InputStreamReader(input);
+                
+              //设置velocity资源加载方式为jar  
+//                props.setProperty("resource.loader", "jar");  
+                //设置velocity资源加载方式为file时的处理类  
+//                props.setProperty("jar.resource.loader.class", "org.apache.velocity.runtime.resource.loader.JarResourceLoader");  
+                //设置jar包所在的位置  
+//                props.setProperty("jar.resource.loader.path", "jar:file:C:\\Users\\Administrator\\git\\annotationprocessing101\\factory\\processor\\target\\annotationprocessing101-processor_fat.jar");  
+                
+//                Properties p = new Properties();
+//                p.setProperty("file.resource.loader.path", vmPath+"//");
+//                ve.init(p);
+
+                
+				log("[velocity.properties] " + props.toString());
+                
+                VelocityEngine ve = new VelocityEngine(props);
+                ve.init();
+                
+                VelocityContext vc = new VelocityContext();
+
+                vc.put("className", className);
+                vc.put("packageName", packageName);
+                vc.put("fields", fields);
+                vc.put("methods", methods);
+
+//                Template vt = ve.getTemplate("beaninfo.vm");
+                log("load vm success");
 				JavaFileObject jfo = filer.createSourceFile(fqClassName + "BeanInfo");
 
 				messager.printMessage(
@@ -98,7 +138,13 @@ public class BeanInfoProcessor extends BaseProcessor {
 
                 Writer writer = jfo.openWriter();
 
-                writer.write(generateJavaClassText());
+                messager.printMessage(
+                        Diagnostic.Kind.NOTE,
+                        "applying velocity template: " + "beaninfo.vm");
+
+//                vt.merge(vc, writer);
+                
+                ve.evaluate(vc, writer, "beaninfo.vm", reader);
 
                 writer.close();
             }
@@ -114,68 +160,6 @@ public class BeanInfoProcessor extends BaseProcessor {
 	@Override
 	public List<Class<?>> acceptAnnotationTypes() {
 		return Arrays.asList(BeanInfo.class);
-	}
-	
-	public String generateJavaClassText() {
-		return "package com.abigdreamer.infinity.persistence.fastdb;\n" + 
-				"\n" + 
-				"import java.nio.ByteBuffer;\n" + 
-				"\n" + 
-				"public class PersonRecordConverter extends RecordConverter<Person> {\n" + 
-				"\n" + 
-				"	FastColumn nameColumn = new FastColumn(FastColumnType.String, \"name\", 10);\n" + 
-				"	FastColumn ageColumn = new FastColumn(FastColumnType.Int, \"age\");\n" + 
-				"	FastColumn moneyColumn = new FastColumn(FastColumnType.Double, \"money\");\n" + 
-				"	FastColumn salaryColumn = new FastColumn(FastColumnType.Float, \"salary\");\n" + 
-				"	FastColumn marriedColumn = new FastColumn(FastColumnType.Boolean, \"married\");\n" + 
-				"	FastColumn[] columns = new FastColumn[]{\n" + 
-				"		nameColumn, ageColumn, moneyColumn, salaryColumn, marriedColumn\n" + 
-				"	};\n" + 
-				"	\n" + 
-				"	@Override\n" + 
-				"	public Class<Person> acceptEntityClass() {\n" + 
-				"		return Person.class;\n" + 
-				"	}\n" + 
-				"	\n" + 
-				"	@Override\n" + 
-				"	public FastColumn[] getColumns() {\n" + 
-				"		return columns;\n" + 
-				"	}\n" + 
-				"\n" + 
-				"	@Override\n" + 
-				"	public void writeEntity2Buffer(Person person, ByteBuffer recordBuffer) {\n" + 
-				"		String name = person.getName();\n" + 
-				"		writeString(recordBuffer, name, nameColumn.getLength());\n" + 
-				"		\n" + 
-				"		recordBuffer.putInt(person.getAge());// int\n" + 
-				"		recordBuffer.putDouble(person.getMoney());// double\n" + 
-				"		recordBuffer.putFloat(person.getSalary());// float\n" + 
-				"		recordBuffer.put((byte)(person.isMarried() ? 1 : 0));// boolean\n" + 
-				"	}\n" + 
-				"\n" + 
-				"	public Person builderObject(ByteBuffer recordBuffer) {\n" + 
-				"		Person person = new Person();\n" + 
-				"		\n" + 
-				"		String name = readString(recordBuffer, nameColumn.getLength());\n" + 
-				"		person.setName(name);\n" + 
-				"		\n" + 
-				"		int age = recordBuffer.getInt();\n" + 
-				"		person.setAge(age);\n" + 
-				"		\n" + 
-				"		double money = recordBuffer.getDouble();\n" + 
-				"		person.setMoney(money);\n" + 
-				"		\n" + 
-				"		float salary = recordBuffer.getFloat();\n" + 
-				"		person.setSalary(salary);\n" + 
-				"		\n" + 
-				"		boolean isMarried = recordBuffer.get() == 1;\n" + 
-				"		person.setMarried(isMarried);\n" + 
-				"		\n" + 
-				"		return person;\n" + 
-				"	}\n" + 
-				"\n" + 
-				"}\n" + 
-				"";
 	}
 
 }
